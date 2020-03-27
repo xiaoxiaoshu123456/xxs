@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+      http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <context:component-scan base-package="com.itheima.jobs"></context:component-scan>
+
+    <!--配置任务详情：将哪个类中的哪个方法作为定时任务去执行-->
+    <bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!--配置定时任务的方法所在的bean-->
+        <property name="targetObject" ref="clearImgJob"></property>
+        <!--配置定时任务执行的方法-->
+        <property name="targetMethod" value="clearImg"></property>
+    </bean>
+
+    <!--配置触发器:定义定时任务应该什么时候执行-->
+    <bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <!--配置定时任务-->
+        <property name="jobDetail" ref="jobDetail"></property>
+        <!--配置cron表达式：什么时候执行-->
+        <property name="cronExpression" value="0 57 15 19 3 ?"></property>
+    </bean>
+
+    <!--配置统一调度工厂：统一执行定时任务-->
+    <bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <array>
+                <ref bean="cronTrigger"></ref>
+            </array>
+        </property>
+    </bean>
+
+
+
+</beans>

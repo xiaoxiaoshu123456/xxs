@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.mapper.CheckGroupMapper">
+
+    <!--新增检查组:需要配置主键回显-->
+    <insert id="add" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+
+        insert into t_checkgroup values(null,#{code},#{name},#{helpCode},#{sex},#{remark},#{attention})
+
+    </insert>
+
+    <!--设置检查组和检查项的中间表数据-->
+   <!-- <insert id="setCheckGroupAndCheckItem">
+        insert into t_checkgroup_checkitem values(#{id},#{checkItemId})
+    </insert>-->
+
+    <insert id="setCheckGroupAndCheckItem">
+        insert into t_checkgroup_checkitem values
+        <foreach collection="checkItemIds" item="checkItemId" separator=",">
+            (#{id},#{checkItemId})
+        </foreach>
+    </insert>
+
+    <!--条件查询数据-->
+    <select id="findByCondition" resultType="CheckGroup">
+        select * from t_checkgroup
+        <if test="queryString!=null and queryString.trim()!=''">
+            where code = #{queryString} or name like '%' #{queryString} '%' or helpCode = #{queryString}
+        </if>
+    </select>
+
+    <!--通过检查组id删除中间表数据-->
+    <delete id="deleteAssocation">
+        delete from t_checkgroup_checkitem where checkgroup_id = #{id}
+    </delete>
+
+    <!--编辑检查组-->
+    <update id="edit">
+        update t_checkgroup
+        <set>
+            <if test="code!=null">
+                code = #{code},
+            </if>
+            <if test="name!=null">
+                name = #{name},
+            </if>
+            <if test="helpCode!=null">
+                helpCode = #{helpCode},
+            </if>
+            <if test="sex!=null">
+                sex = #{sex},
+            </if>
+            <if test="remark!=null">
+                remark = #{remark},
+            </if>
+            <if test="attention!=null">
+                attention = #{attention},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--统计检查组有没有被套餐引用-->
+    <select id="findCountById" resultType="Integer">
+        select count(checkgroup_id) from t_setmeal_checkgroup where checkgroup_id = #{id}
+    </select>
+
+    <!--通过id删除检查组-->
+    <delete id="deleteById">
+        delete from t_checkgroup where id = #{id}
+    </delete>
+
+    <!--查询所有检查组信息-->
+    <select id="findAll" resultType="CheckGroup">
+        select * from t_checkgroup
+    </select>
+
+
+
+    <!--检查组的自定义结果集：告诉mybatis将检查项封装到检查组中-->
+   <!-- <resultMap id="CheckGroupResultMap" type="CheckGroup">
+        <collection property="checkItems" javaType="List" ofType="CheckItem" select="com.itheima.mapper.CheckItemMapper.findCheckItemByCheckGroupId" column="id"></collection>
+    </resultMap>-->
+
+    <!--通过套餐的id可以查询到对应的检查组信息-->
+    <!--<select id="findCheckGroupBySetmealId" resultMap="CheckGroupResultMap">
+        select * from t_checkgroup where id in(select checkgroup_id from t_setmeal_checkgroup where setmeal_id = #{setmealId})
+    </select>-->
+
+    <!--通过套餐id检查组信息-->
+    <select id="findCheckGroupBySetmealId" resultType="CheckGroup">
+        select * from t_checkgroup where id in(select checkgroup_id from t_setmeal_checkgroup where setmeal_id = #{id})
+    </select>
+</mapper>

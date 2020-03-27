@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.mapper.CheckItemMapper">
+
+    <!--新增检查项-->
+    <insert id="add">
+        insert into t_checkitem values(null,#{code},#{name},#{sex},#{age},#{price},#{type},#{attention},#{remark});
+    </insert>
+
+    <!--条件查询总记录数-->
+    <!--<select id="findCountByCondition" resultType="Long">
+        select count(id) from t_checkitem
+        <if test="queryString !=null and queryString.trim()!=''">
+            where code = #{queryString} or name like '%' #{queryString} '%'
+        </if>
+    </select>-->
+
+
+    <!--条件查询分页数据-->
+   <!-- <select id="findByCondition" resultType="CheckItem">
+        select * from t_checkitem
+        <if test="queryString !=null and queryString.trim()!=''">
+            where code = #{queryString} or name like '%' #{queryString} '%'
+        </if>
+        limit #{firstResult} , #{pageSize}
+    </select>-->
+
+    <!--条件查询分页数据-->
+    <select id="findByCondition" resultType="CheckItem">
+        select * from t_checkitem
+        <if test="queryString !=null and queryString.trim()!=''">
+            where code = #{queryString} or name like '%' #{queryString} '%'
+        </if>
+    </select>
+
+    <!--通过id删除检查项-->
+    <delete id="deleteById">
+        delete from t_checkitem where id = #{id}
+    </delete>
+
+    <!--查询检查项是否被引用-->
+    <select id="findCountByCheckItemId" resultType="Integer">
+        select count(checkitem_id) from t_checkgroup_checkitem where checkitem_id = #{id}
+    </select>
+
+    <!--通过id查询检查项-->
+    <select id="findById" resultType="CheckItem">
+        select * from t_checkitem where id = #{id}
+    </select>
+
+    <!--编辑页面-->
+    <update id="edit">
+        update t_checkitem
+        <set>
+            <if test="code !=null">
+                code = #{code},
+            </if>
+            <if test="name !=null">
+                name = #{name},
+            </if>
+            <if test="sex !=null">
+                sex = #{sex},
+            </if>
+            <if test="age !=null">
+                age = #{age},
+            </if>
+            <if test="price !=null">
+                price = #{price},
+            </if>
+            <if test="type !=null">
+                type = #{type},
+            </if>
+            <if test="attention !=null">
+                attention = #{attention},
+            </if>
+            <if test="remark !=null">
+                remark = #{remark}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--查询所有检查项-->
+    <select id="findAllCheckItem" resultType="CheckItem">
+        select * from t_checkitem
+    </select>
+
+    <!--通过检查组id查询项id-->
+    <select id="findCheckItemIdsByCheckGroupId" resultType="Integer">
+        select checkitem_id from t_checkgroup_checkitem where checkgroup_id = #{id}
+    </select>
+
+
+
+    <!--通过检查组的id查询对应的检查项的id-->
+    <select id="findCheckItemByCheckGroupId" resultType="CheckItem">
+        select * from t_checkitem where id in(select checkitem_id from t_checkgroup_checkitem where checkgroup_id = #{checkGroupId})
+    </select>
+
+
+    <select id="findCheckItemByCheckGroupIds" resultType="CheckItem">
+        select * from t_checkitem where id in(select checkitem_id from t_checkgroup_checkitem where checkgroup_id = #{id})
+    </select>
+
+</mapper>

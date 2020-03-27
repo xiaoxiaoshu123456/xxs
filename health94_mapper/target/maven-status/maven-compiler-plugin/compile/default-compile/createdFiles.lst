@@ -1,0 +1,7 @@
+com\itheima\mapper\OrderMapper.class
+com\itheima\mapper\OrderSettingMapper.class
+com\itheima\mapper\CheckItemMapper.class
+com\itheima\mapper\SetmealMapper.class
+com\itheima\mapper\MemberMapper.class
+com\itheima\mapper\CheckGroupMapper.class
+com\itheima\mapper\UserMapper.class

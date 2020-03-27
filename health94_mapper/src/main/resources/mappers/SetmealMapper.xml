@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.mapper.SetmealMapper">
+
+    <!--新增套餐-->
+    <insert id="add" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+
+        insert into t_setmeal values(null,#{name},#{code},#{helpCode},#{sex},#{age},#{price},#{remark},#{attention},#{img})
+    </insert>
+
+    <!--插入中间表数据-->
+    <insert id="setSetmealAndCheckGroup">
+        insert into t_setmeal_checkgroup values
+        <foreach collection="checkGroupIds" item="checkGroupId" separator=",">
+            (#{id},#{checkGroupId})
+        </foreach>
+    </insert>
+
+    <!--条件查询套餐信息-->
+    <select id="findByCondition" resultType="Setmeal">
+        select * from t_setmeal
+        <if test="queryString!=null and queryString.trim()!=''">
+            where code = #{queryString} or name like '%' #{queryString} '%' or helpCode = #{queryString}
+        </if>
+    </select>
+
+    <!--查询所有套餐列表-->
+    <select id="findSetmealAll" resultType="Setmeal">
+        select * from t_setmeal
+    </select>
+
+    <!--
+        自定义结果集:告诉mybatis怎么封装数据，由我说了算
+        id:自定义结果集的唯一标识，不能重复，一般是用来被引用的
+        type:结果集类型，类似于resultType，将查询出来的数据封装到哪个类型中
+        autoMapping:自动映射，如果表中的字段和pojo中的属性名称一致，让其建立自动映射的关系。
+    -->
+    <!--<resultMap id="SetmealResultMap" type="Setmeal" autoMapping="true">
+        &lt;!&ndash;配置主键的映射关系&ndash;&gt;
+        <id column="id" property="id"></id>
+        &lt;!&ndash;
+            一对多的映射关系
+            将多个检查组封装到套餐的某个属性中
+            property：将套餐对应的检查组的数据封装到套餐中的checkGroups属性
+            javaType:checkGroups属性的类型
+            ofType：checkGroups是一个集合，ofType指的是集合中的元素类型
+        &ndash;&gt;
+        <collection property="checkGroups" javaType="List" ofType="CheckGroup" autoMapping="true">
+            &lt;!&ndash;配置检查组的主键的映射关系&ndash;&gt;
+            <id column="cid" property="id"></id>
+            <result column="cremark" property="remark"></result>
+            <result column="cname" property="name"></result>
+            &lt;!&ndash;
+                配置一对多的映射关系，去封装检查项
+            &ndash;&gt;
+            <collection property="checkItems" javaType="List" ofType="CheckItem" autoMapping="true">
+                <id column="ckid" property="id"></id>
+                <result column="ckname" property="name"></result>
+            </collection>
+        </collection>
+
+    </resultMap>-->
+
+    <!--通过套餐id查询套餐和套餐对应的检查组以及检查组对应的检查项数据-->
+   <!-- <select id="findById" resultMap="SetmealResultMap">
+        SELECT
+            s.*,c.id cid,c.remark cremark,c.name cname,ck.id ckid,ck.name ckname
+        FROM
+            t_setmeal s
+        INNER JOIN t_setmeal_checkgroup sc ON s.id = sc.setmeal_id
+        INNER JOIN t_checkgroup c on c.id = sc.checkgroup_id
+        INNER JOIN t_checkgroup_checkitem cc on c.id = cc.checkgroup_id
+        INNER JOIN t_checkitem ck on ck.id = cc.checkitem_id
+        WHERE
+            s.id = #{id}
+    </select>-->
+
+    <!--配置自定义结果集：告诉mybatis将检查组封装到套餐中-->
+   <!-- <resultMap id="SetmealResultMap" type="Setmeal">
+        <collection property="checkGroups" javaType="List" ofType="CheckGroup" select="com.itheima.mapper.CheckGroupMapper.findCheckGroupBySetmealId" column="id"></collection>
+    </resultMap>
+-->
+
+    <!--通过套餐id查询套餐-->
+   <!-- <select id="findById" resultMap="SetmealResultMap">
+        select * from t_setmeal where id = #{id}
+    </select>-->
+
+    <!--查询套餐详情的第三种方式-->
+    <select id="findById" resultType="Setmeal">
+        select * from t_setmeal where id = #{id}
+    </select>
+
+    <!--查询套餐占比数据-->
+    <select id="getSetmealReport" resultType="Map">
+        SELECT
+            count(s.id) value,s.name
+        FROM
+            t_order o
+        INNER JOIN t_setmeal s on o.setmeal_id = s.id
+        group by s.id
+    </select>
+
+
+
+</mapper>

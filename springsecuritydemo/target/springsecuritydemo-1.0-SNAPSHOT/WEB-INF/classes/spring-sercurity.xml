@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+   http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc 
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--配置匿名访问路径：不需要拦截，直接就能访问的url-->
+    <security:http security="none" pattern="/js/**"></security:http>
+    <security:http security="none" pattern="/favicon.ico"></security:http>
+    <security:http security="none" pattern="/login.html"></security:http>
+
+    <!--
+        http标签：定义权限相关配置信息的
+        auto-config：配置为true，表示，使用springsecurity框架提供的自动化配置，比如，登陆页面，登出操作等等。
+        use-expressions：表示使用表达式来配置权限控制
+    -->
+    <security:http auto-config="true" use-expressions="true">
+
+        <!--
+            intercept-url标签：用来定义拦截规则
+            pattern：/**表示拦截所有请求。
+            access：表示拥有相关的权限之后才能去访问被拦截的url
+        -->
+        <!--<security:intercept-url pattern="/**" access="hasRole('ROLE_ADMIN')"></security:intercept-url>-->
+        <security:intercept-url pattern="/a.html" access="isAuthenticated()"></security:intercept-url>
+        <security:intercept-url pattern="/b.html" access="hasAuthority('add')"></security:intercept-url>
+        <security:intercept-url pattern="/c.html" access="hasRole('ROLE_MANAGER')"></security:intercept-url>
+        <security:intercept-url pattern="/d.html" access="hasRole('ADMIN')"></security:intercept-url>
+
+        <!--配置自定义的登陆页面
+            login-page:将哪个页面作为自定义登陆页面
+            login-processing-url：自定义登陆页面中的action的值
+            username-parameter：自定义登陆页面中的用户名的参数名
+            password-parameter：自定义登陆页面找那个的密码的参数名
+            default-target-url：登陆成功之后默认跳转到哪个url
+            always-use-default-target:不管之前访问的是哪个url，只要登录成功总是跳转到default-target-url指定的url
+            authentication-failure-url:如果登陆失败，可以跳转到指定的url
+        -->
+        <security:form-login login-page="/login.html"
+                             login-processing-url="/login.do"
+                             username-parameter="username"
+                             password-parameter="password"
+                             default-target-url="/index.html"
+                             always-use-default-target="true"
+                             authentication-failure-url="/login.html"></security:form-login>
+
+        <!--将跨站点伪装过滤器关闭-->
+        <security:csrf disabled="true"></security:csrf>
+
+        <!--配置登出操作
+            logout-url:执行退出登陆的操作要发送的url
+            logout-success-url:退出登陆成功之后跳转的url
+            invalidate-session:清空session
+        -->
+        <security:logout logout-url="/logout.do" logout-success-url="/login.html" invalidate-session="true"></security:logout>
+
+    </security:http>
+
+    <!--认证管理器：用于处理认证操作-->
+   <!-- <security:authentication-manager>
+        &lt;!&ndash;
+            认证提供者：执行具体的认证逻辑
+        &ndash;&gt;
+        <security:authentication-provider>
+            &lt;!&ndash;
+                用户服务：获取用户的相关信息，提供给认证提供者
+            &ndash;&gt;
+            <security:user-service>
+                &lt;!&ndash;
+                    配置用户相关信息
+                    name:用户的登录名称
+                    password:用户的登陆密码,{noop}，登陆的密码是明文（没有被加密过）
+                    authorities：配置用户的权限的
+                &ndash;&gt;
+                <security:user name="admin" password="{noop}1234" authorities="ROLE_ADMIN"></security:user>
+            </security:user-service>
+        </security:authentication-provider>
+    </security:authentication-manager>-->
+
+    <security:authentication-manager>
+        <!--
+            user-service-ref:通过bean的id引用自定义的认证服务类
+        -->
+        <security:authentication-provider user-service-ref="securityUserService">
+            <security:password-encoder ref="passwordEncoder"></security:password-encoder>
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+    <!--配置注解扫描-->
+    <context:component-scan base-package="com.itheima"></context:component-scan>
+
+    <!--配置加密对象-->
+    <bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></bean>
+
+    <!--声明使用注解配置security-->
+    <security:global-method-security pre-post-annotations="enabled"></security:global-method-security>
+
+</beans>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.mapper.UserMapper">
+
+    <!--<select id="findByUsername" resultType="User">
+        select * from t_user where username = #{username}
+    </select>-->
+
+    <resultMap id="UserAndRoleAndPermissionResultMap" type="User" autoMapping="true">
+        <id column="id" property="id"></id>
+        <collection property="roles" javaType="java.util.Set" ofType="Role" autoMapping="true">
+            <result column="rkeyword" property="keyword"></result>
+
+            <collection property="permissions" javaType="java.util.Set" ofType="Permission" autoMapping="true">
+                <result column="pkeyword" property="keyword"></result>
+            </collection>
+        </collection>
+    </resultMap>
+
+
+    <select id="findByUsername" resultMap="UserAndRoleAndPermissionResultMap">
+        SELECT
+            u.*,r.keyword rkeyword,p.keyword pkeyword
+        FROM
+            t_user u
+        INNER JOIN t_user_role ur on u.id = ur.user_id
+        INNER JOIN t_role r on r.id = ur.role_id
+        inner join t_role_permission rp on r.id = rp.role_id
+        INNER JOIN t_permission p on p.id = rp.permission_id
+        WHERE
+            u.username = #{username}
+    </select>
+</mapper>

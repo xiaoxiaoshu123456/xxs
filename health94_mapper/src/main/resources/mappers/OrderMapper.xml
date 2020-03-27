@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.mapper.OrderMapper">
+
+    <!--通过会员编号、日期和套餐编号查询订单-->
+    <select id="findByCondition" resultType="Order">
+        select * from t_order where member_id = #{memberId} and orderDate = #{orderDate} and setmeal_id = #{setmealId}
+    </select>
+
+    <!--新增预约订单-->
+    <insert id="add" useGeneratedKeys="true" keyProperty="id">
+        insert into t_order values (null,#{memberId},#{orderDate},#{orderType},#{orderStatus},#{setmealId})
+    </insert>
+
+    <!--通过id查询订单详情-->
+    <select id="findById" resultType="Map">
+        SELECT
+            m.name member,s.name setmeal,o.orderDate,o.orderType
+        FROM
+            t_order o
+        INNER JOIN t_member m on m.id = o.member_id
+        INNER JOIN t_setmeal s on s.id = o.setmeal_id
+        WHERE
+            o.id = #{id}
+    </select>
+
+    <!--今日新增预约数-->
+    <select id="findTodayOrderNumber" resultType="Integer">
+        select count(id) from t_order where orderDate = #{today}
+    </select>
+
+    <!--今日到诊数-->
+    <select id="findTodayVisitsNumber" resultType="Integer">
+        select count(id) from t_order where orderDate = #{today} and orderStatus = "已到诊"
+    </select>
+
+    <!--通过日期查询预约数-->
+    <select id="findOrderNumberAfterDate" resultType="Integer">
+        select count(id) from t_order where orderDate >= #{orderDate}
+    </select>
+
+    <!--通过日期查询到诊数-->
+    <select id="findVisitsNumberAfterDate" resultType="Integer">
+        select count(id) from t_order where orderDate >= #{orderDate} and orderStatus = "已到诊"
+    </select>
+
+    <!--套餐占比统计-->
+    <select id="findHotSetmeal" resultType="Map">
+        SELECT
+            count(s.id) setmeal_count,s.name,count(s.id)/(select count(id) from t_order) proportion
+        FROM
+            t_order o
+        INNER JOIN t_setmeal s ON s.id = o.setmeal_id
+        group by s.id
+        order by setmeal_count desc
+        limit 0,4
+    </select>
+
+</mapper>
